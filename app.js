@@ -1,9 +1,8 @@
-const { ApolloServer } = require('apollo-server')
-const typeDefs = require('./schema/typeDefs')
-const resolvers = require('./schema/resolvers')
+const { GraphQLServer, PubSub } = require('graphql-yoga');
+const { typeDefs, resolvers } = require('./schema/schema')
 
-const server = new ApolloServer({ typeDefs, resolvers })
-
-server.listen().then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
-});
+const pubsub = new PubSub()
+const server = new GraphQLServer({ typeDefs, resolvers, context: { pubsub } });
+server.start(({ port }) => {
+    console.log(`Server on http:localhost:${port}`)
+})

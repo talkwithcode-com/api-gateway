@@ -4,6 +4,67 @@ const axios = require('axios')
 const userQuestionUrl = "http://localhost:5001"
 const codexUrl = "http://localhost:5002"
 
+const typeDefs = `
+type Question {
+    _id: ID
+    timeLimit: Float
+    title: String
+    score: String
+    description: String
+    user_id: String
+    sample_solustions: [SampleSolution]
+    solutions: [Solution]
+}
+
+type SampleSolution {
+    _id: ID
+    input: String
+    output: String
+}
+
+type Solution {
+    _id: ID
+    input: String
+    output: String
+}
+
+type Code {
+    id: ID
+    user: String
+    content: String
+}
+
+type Query {
+    questions: [Question]
+    sample_solutions: [SampleSolution]
+    solutions: [Solution]
+    code: Code
+    codes: [Code!]
+}
+
+type Mutation {
+    addQuestion(timeLimit: Float, title: String, score: String, description: String, user_id: String) : Question
+    deleteQuestion(question_id: ID) : Question
+    updateQuestion(question_id: ID, timeLimit: Float, title: String, score: String, description: String) : Question
+    addSampleSolution(input: String, output: String) : SampleSolution
+    deleteSampleSolution(solution_id: ID, question_id: ID): SampleSolution
+    updateSampleSolution(solution_id: ID, input: String, output: String): SampleSolution
+    addSolution(input: String, output: String): Solution
+    deleteSolution(solution_id: ID, question_id: ID): Solution
+    updateSolution(solution_id: ID, input: String, output: String): Solution
+    postCode(user: String!, content: String!) : ID!
+}
+
+type Subscription {
+    code: Code
+}
+`
+
+let code = {}
+const codes = []
+const subscribers = []
+const onCodeUpdates = (fn) => subscribers.push(fn)
+
 const resolvers = {
     Query: {
         questions: async () => {
@@ -47,7 +108,9 @@ const resolvers = {
             } catch (error) {
                 return error
             }
-        }
+        },
+        code: () => code,
+        codes: () => codes,
     },
     Mutation: {
         async addQuestion(_, args){
@@ -142,8 +205,33 @@ const resolvers = {
             } catch (error) {
                 return error
             }
+        },
+        postCode: (parent, { user, content }) => {
+            const id = codes.length;
+            codes.push({
+                id,
+                user,
+                content
+            });
+            code = {
+                id,
+                user,
+                content
+            }
+            subscribers.forEach((fn) => fn())
+            return id
+        }
+    },
+    Subscription: {
+        code: {
+            subscribe: (parent, args, { pubsub }) => {
+                const channel = Math.random().toString(36).slice(2, 15);
+                onCodeUpdates(() => pubsub.publish(channel, { code }));
+                setTimeout(() => pubsub.publish(channel, { code }), 0)
+                return pubsub.asyncIterator(channel);
+            }
         }
     }
 }
 
-module.exports = resolvers
+module.exports = { typeDefs, resolvers }
