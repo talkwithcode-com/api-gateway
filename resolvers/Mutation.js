@@ -6,60 +6,98 @@ const subscribers = [];
 const onCodeUpdates = (fn) => subscribers.push(fn);
 
 const Mutation = {
+  // done
   async addQuestion(_, args, { questionUserService, redis }) {
     try {
-      const { data } = await questionUserService.post("/", { ...args.data });
+      const response = await questionUserService.post(
+        "/questions",
+        {
+          ...args,
+        },
+        {
+          headers: {
+            access_token: args.access_token,
+          },
+        }
+      );
+      const { data } = response;
       redis.del("questions");
       return data;
     } catch (error) {
       return error;
     }
   },
+  // done
   async addSampleSolution(_, args, { questionUserService, redis }) {
     try {
-      const { data } = await questionUserService.post("/", { ...args.data });
+      const response = await questionUserService.put(
+        "/question/" + args.question_id + "/add-sample-solution",
+        { ...args },
+        {
+          headers: {
+            access_token: args.access_token,
+          },
+        }
+      );
+      const { data } = response;
       redis.del("sampleSolutions");
       return data;
     } catch (error) {
       return error;
     }
   },
+  // done
   async addSolution(_, args, { questionUserService, redis }) {
     try {
-      const { data } = await questionUserService.post("/", { ...args.data });
+      const response = await questionUserService.put(
+        "/question/" + args.question_id + "/add-solution",
+        {
+          ...args,
+        },
+        {
+          headers: {
+            access_token: args.access_token,
+          },
+        }
+      );
+      const { data } = response;
       redis.del("solutions");
       return data;
     } catch (error) {
       return error;
     }
   },
+  //done
   async deleteQuestion(_, args, { questionUserService, redis }) {
     try {
-      const { data } = await questionUserService.delete(`/${args.question_id}`);
-      redis.del("questions");
-      return data;
-    } catch (error) {
-      return error;
-    }
-  },
-  async deleteSampleSolution(_, args, { questionUserService, redis }) {
-    try {
-      const { data } = await questionUserService.delete(
-        `/${args.question_id}/${args.solution_id}`
+      const response = await questionUserService.delete(
+        "/questions/" + args.question_id,
+        {
+          headers: {
+            access_token: args.access_token,
+          },
+        }
       );
-      redis.del("sampleSolutions");
-      return data;
+      const { data } = response;
+      redis.del("questions");
+      return "question deleted";
     } catch (error) {
       return error;
     }
   },
   async deleteSolution(_, args, { questionUserService, redis }) {
     try {
-      const { data } = await questionUserService.delete(
-        `/${args.question_id}/${args.solution_id}`
+      const response = await questionUserService.delete(
+        "/questions/" + args.question_id + "/" + args.solution_id,
+        {
+          headers: {
+            access_token: args.access_token,
+          },
+        }
       );
-      redis.del("solutions");
-      return data;
+      const { data } = response;
+      redis.del("solution");
+      return "Solution deleted";
     } catch (error) {
       return error;
     }
@@ -83,40 +121,6 @@ const Mutation = {
       return error;
     }
   },
-  async updateSampleSolution(_, args, { questionUserService, redis }) {
-    try {
-      const { input, output, question_id, solution_id } = args;
-      const payload = {
-        input,
-        output,
-      };
-      const { data } = await questionUserService.put(
-        `/${question_id}/${solution_id}`,
-        payload
-      );
-      redis.del("sampleSolutions");
-      return data;
-    } catch (error) {
-      return error;
-    }
-  },
-  async updateSolution(_, args, { questionUserService, redis }) {
-    try {
-      const { input, output, question_id, solution_id } = args;
-      const payload = {
-        input,
-        output,
-      };
-      const { data } = await questionUserService.put(
-        `/${question_id}/${solution_id}`,
-        payload
-      );
-      redis.del("solutions");
-      return data;
-    } catch (error) {
-      return error;
-    }
-  },
   postCode: async (parent, { user, content }, { redis }) => {
     const id = codes.length;
     code = {
@@ -129,13 +133,15 @@ const Mutation = {
     subscribers.forEach((fn) => fn());
     return id;
   },
+  // done
   addChannelToken: async (
     _,
-    { time_start, time_end, user_id, ids },
+    { title, time_start, time_end, user_id, ids },
     { redis }
   ) => {
     try {
       let payload = {
+        title,
         time_start,
         time_end,
         user_id,
@@ -154,6 +160,7 @@ const Mutation = {
       return error;
     }
   },
+  // outstanding - get questions to services
   validateChannelToken: async (_, { key }, { questionUserService, redis }) => {
     try {
       let token = await redis.get(key);
@@ -164,14 +171,11 @@ const Mutation = {
         //query ke question service by ids
         const idsArr = ids.trim().split(",");
 
-        // let questions = [];
         let questions = await idsArr.map(async (id) => {
           const resp = await questionUserService.get(
             `/questions/${id}/solution`
           );
           const { data } = await resp;
-          console.log(data, "<<< data id di mapping");
-          // questions.push(data);
           return JSON.stringify(data);
         });
 
@@ -184,6 +188,31 @@ const Mutation = {
 
         return Decode;
       }
+    } catch (error) {
+      return error;
+    }
+  },
+  // done
+  register: async (_, args, { questionUserService }) => {
+    try {
+      const response = await questionUserService.post("/users/register", {
+        ...args,
+      });
+      const { data } = response;
+      return JSON.stringify(data);
+    } catch (error) {
+      return error;
+    }
+  },
+  // done
+  login: async (_, args, { questionUserService }) => {
+    try {
+      const response = await questionUserService.post("/users/login", {
+        ...args,
+      });
+      console.log(response, "<<< response");
+      const { data } = response;
+      return JSON.stringify(data);
     } catch (error) {
       return error;
     }

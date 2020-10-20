@@ -8,12 +8,12 @@ const axios = require("axios").default;
 const Redis = require("ioredis");
 const redis = new Redis();
 
-const Query = require("./resolvers/Query");
+const { Query } = require("./resolvers/Query");
 const { Mutation } = require("./resolvers/Mutation");
 const { Subscription } = require("./resolvers/Mutation");
 
-const questionUserService = axios.create({ baseURL: "http://localhost:3000/" });
-const codexService = axios.create({ baseURL: "http://localhost:5002/" });
+const questionUserService = axios.create({ baseURL: "http://localhost:3000" });
+const codexService = axios.create({ baseURL: "http://localhost:5002" });
 
 const pubsub = new PubSub();
 const server = new GraphQLServer({

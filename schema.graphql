@@ -1,6 +1,5 @@
 type Question {
-  _id: ID
-  timeLimit: Float
+  id: ID
   title: String
   score: String
   description: String
@@ -27,10 +26,6 @@ type Code {
   content: String
 }
 
-type Token {
-  token: String
-}
-
 type Decode {
   time_start: String!
   time_end: String!
@@ -38,17 +33,20 @@ type Decode {
   questions: [String]!
 }
 
-type Query {
-  questions: [Question]
-  findByQuestionId(_id: ID): Question
+type User {
+  _id: ID!
+  name: String!
+  email: String!
+  password: String!
+}
 
-  sample_solutions: [SampleSolution]
-  solutions: [Solution]
+type Query {
+  questions(access_token: String): [Question]
+
+  solution(_id: String, access_token: String): Solution
 
   code: Code
   codes: [Code]
-
-  token: Token
 }
 
 type Mutation {
@@ -58,27 +56,40 @@ type Mutation {
     score: String
     description: String
     user_id: String
+    access_token: String
   ): Question
-  deleteQuestion(question_id: ID): Question
+  deleteQuestion(question_id: ID, access_token: String): String
   updateQuestion(
     question_id: ID
     timeLimit: Float
     title: String
     score: String
     description: String
+    access_token: String
   ): Question
 
-  addSampleSolution(input: String, output: String): SampleSolution
-  deleteSampleSolution(solution_id: ID, question_id: ID): SampleSolution
-  updateSampleSolution(
-    solution_id: ID
+  addSampleSolution(
     input: String
     output: String
+    question_id: String
+    access_token: String
   ): SampleSolution
 
-  addSolution(input: String, output: String): Solution
-  deleteSolution(solution_id: ID, question_id: ID): Solution
-  updateSolution(solution_id: ID, input: String, output: String): Solution
+  addSolution(
+    input: String
+    output: String
+    question_id: String
+    access_token: String
+  ): Solution
+
+  deleteSolution(
+    access_token: String
+    question_id: String
+    solution_id: String
+  ): String
+
+  register(name: String!, email: String!, password: String!): String!
+  login(email: String!, password: String!): String!
 
   postCode(user: String!, content: String!): ID!
   addChannelToken(

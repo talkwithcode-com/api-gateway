@@ -5,7 +5,10 @@ const Query = {
       if (questionsCache !== null) {
         return JSON.parse(questionsCache);
       } else {
-        const { data } = await questionUserService.get("/");
+        const response = await questionUserService.get("/questions", {
+          headers: { ...args },
+        });
+        const { data } = response;
         await redis.set("questions", JSON.stringify(data.questions));
         return data.questions;
       }
@@ -13,29 +16,23 @@ const Query = {
       return error;
     }
   },
-  sample_solutions: async (parent, args, { questionUserService, redis }) => {
-    const sampleSolutionsCache = await redis.get("sampleSolutions");
+  solution: async (parent, args, { questionUserService, redis }) => {
+    const solutionCache = await redis.get("solution");
     try {
-      if (sampleSolutionsCache !== null) {
-        return JSON.parse(sampleSolutionsCache);
+      if (solutionCache !== null) {
+        return JSON.parse(solutionCache);
       } else {
-        const { data } = await questionUserService.get("/");
-        await redis.set("sampleSolutions", JSON.stringify(data.solution));
-        return data.solution;
-      }
-    } catch (error) {
-      return error;
-    }
-  },
-  solutions: async (parent, args, { questionUserService, redis }) => {
-    const solutionsCache = await redis.get("solutions");
-    try {
-      if (solutionsCache !== null) {
-        return JSON.parse(solutionsCache);
-      } else {
-        const { data } = await questionUserService.get("/");
+        const response = await questionUserService.get(
+          "/questions/" + args._id + "/solution",
+          {
+            headers: {
+              access_token: args.access_token,
+            },
+          }
+        );
+        const { data } = response;
         await redis.set("solutions", JSON.stringify(data.solution));
-        return data.solution;
+        return data.solution[0];
       }
     } catch (error) {
       return error;
@@ -45,7 +42,6 @@ const Query = {
     const codeCache = await redis.get("code");
     try {
       if (codeCache !== null) {
-        console.log(codeCache, "<<< masuk query codeCache");
         return JSON.parse(codeCache);
       } else {
         return {};
@@ -54,16 +50,6 @@ const Query = {
       return error;
     }
   },
-  token: async (parent, { token }, { redis }) => {
-    const tokenCache = await redis.get(token);
-    try {
-      if (tokenCache !== null) {
-        return tokenCache;
-      } else {
-        return "token tidak ada di redis";
-      }
-    } catch (error) {
-      return error;
-    }
-  },
 };
+
+module.exports = { Query };
