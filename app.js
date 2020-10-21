@@ -12,16 +12,24 @@ const { Query } = require("./resolvers/Query");
 const { Mutation } = require("./resolvers/Mutation");
 const { Subscription } = require("./resolvers/Mutation");
 
-const questionUserService = axios.create({ baseURL: "http://localhost:3000" });
-const codexService = axios.create({ baseURL: "http://localhost:5002" });
-
+const questionUserService = axios.create({
+  baseURL: "http://35.240.166.181:3000",
+});
+const codexService = axios.create({ baseURL: "http://35.247.134.61" });
 const pubsub = new PubSub();
-const server = new GraphQLServer({
-  typeDefs: importSchema("./schema.graphql"),
-  resolvers: { Query, Mutation, Subscription },
-  context: { pubsub, redis, questionUserService, codexService },
-});
 
-server.start(({ port }) => {
-  console.log(`Server on http:localhost:${port}`);
-});
+const startServer = async () => {
+  const server = new GraphQLServer({
+    typeDefs: importSchema("./schema.graphql"),
+    resolvers: { Query, Mutation, Subscription },
+    context: { pubsub, redis, questionUserService, codexService },
+  });
+
+  await server.start(({ port }) => {
+    console.log(`Server on http:localhost:${port}`);
+  });
+};
+
+startServer();
+
+module.exports = startServer;

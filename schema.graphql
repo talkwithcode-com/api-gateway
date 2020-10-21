@@ -4,8 +4,8 @@ type Question {
   score: String
   description: String
   user_id: String
-  sample_solustions: [SampleSolution]
-  solutions: [Solution]
+  sample_solution: [SampleSolution]
+  solution: [Solution]
 }
 
 type SampleSolution {
@@ -43,7 +43,7 @@ type User {
 type Query {
   questions(access_token: String): [Question]
 
-  solution(_id: String, access_token: String): Solution
+  question(_id: String, access_token: String): Question
 
   code: Code
   codes: [Code]
@@ -100,6 +100,27 @@ type Mutation {
   ): String!
 
   validateChannelToken(key: String!): Decode
+
+  runCode(access_token: String!, data: RunCodeInput!): Result!
+}
+
+input RunCodeInput {
+  question_id: String!
+  source_code: String!
+  lang: String!
+}
+
+type Result {
+  language: String!
+  logs: [Log]
+}
+
+type Log {
+  id: ID!
+  status: String!
+  stderr: String!
+  stdout: String!
+  stdin: String!
 }
 
 type Subscription {

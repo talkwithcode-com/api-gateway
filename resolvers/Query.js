@@ -16,8 +16,8 @@ const Query = {
       return error;
     }
   },
-  solution: async (parent, args, { questionUserService, redis }) => {
-    const solutionCache = await redis.get("solution");
+  question: async (parent, args, { questionUserService, redis }) => {
+    const solutionCache = await redis.get("question");
     try {
       if (solutionCache !== null) {
         return JSON.parse(solutionCache);
@@ -31,8 +31,9 @@ const Query = {
           }
         );
         const { data } = response;
-        await redis.set("solutions", JSON.stringify(data.solution));
-        return data.solution[0];
+        console.log(data.questions[0], "<<< ini data questions");
+        await redis.set("question", JSON.stringify(data.questions[0]));
+        return data.questions[0];
       }
     } catch (error) {
       return error;

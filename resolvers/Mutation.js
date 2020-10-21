@@ -217,6 +217,45 @@ const Mutation = {
       return error;
     }
   },
+  runCode: async (_, args, { codexService, questionUserService, redis }) => {
+    try {
+      // dapet sample test case
+      const { access_token, data: dataInput } = args;
+      const { question_id, lang, source_code } = dataInput;
+      console.log(args, "<<< args ini test case");
+
+      const resp = await questionUserService.get(
+        "/questions/" + question_id + "/solution",
+        {
+          headers: {
+            access_token,
+          },
+        }
+      );
+      const {
+        data: { questions },
+      } = resp;
+
+      const test_cases = questions[0].sample_solution.map((e) => {
+        return {
+          id: e.id,
+          input: e.input,
+          output: e.output,
+        };
+      });
+
+      // kirim ke codex
+      const response = await codexService.post("/run", {
+        source_code,
+        language: lang,
+        test_cases,
+      });
+      const { data } = response;
+      return data;
+    } catch (error) {
+      return error.response;
+    }
+  },
 };
 
 const Subscription = {
