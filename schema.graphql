@@ -1,5 +1,5 @@
 type Question {
-  id: ID
+  _id: ID
   title: String
   score: String
   description: String
@@ -99,7 +99,7 @@ type Mutation {
     ids: String!
   ): String!
 
-  validateChannelToken(key: String!): Decode
+  validateChannelToken(key: String!, access_token: String!): Decode
 
   runCode(access_token: String!, data: RunCodeInput!): Result!
 }

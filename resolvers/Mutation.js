@@ -161,7 +161,11 @@ const Mutation = {
     }
   },
   // outstanding - get questions to services
-  validateChannelToken: async (_, { key }, { questionUserService, redis }) => {
+  validateChannelToken: async (
+    _,
+    { key, access_token },
+    { questionUserService, redis }
+  ) => {
     try {
       let token = await redis.get(key);
       if (token) {
@@ -173,13 +177,14 @@ const Mutation = {
 
         let questions = await idsArr.map(async (id) => {
           const resp = await questionUserService.get(
-            `/questions/${id}/solution`,
+            "/questions/" + id + "/solution",
             {
               headers: {
-                access_token: args.access_token,
+                access_token,
               },
             }
           );
+          console.log(id, "<<< id");
           const { data } = resp;
           return JSON.stringify(data);
         });
