@@ -173,9 +173,14 @@ const Mutation = {
 
         let questions = await idsArr.map(async (id) => {
           const resp = await questionUserService.get(
-            `/questions/${id}/solution`
+            `/questions/${id}/solution`,
+            {
+              headers: {
+                access_token: args.access_token,
+              },
+            }
           );
-          const { data } = await resp;
+          const { data } = resp;
           return JSON.stringify(data);
         });
 
