@@ -3,6 +3,8 @@ services:
   redis-server: 
     image: 'redis'
   node-app:
+    environment:
+      - SECRET=bebasaja
     build: .
     ports:
       - "80:4000"

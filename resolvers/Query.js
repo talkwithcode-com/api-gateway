@@ -19,7 +19,7 @@ const Query = {
   question: async (parent, args, { questionUserService, redis }) => {
     const solutionCache = await redis.get("question");
     try {
-      if (solutionCache !== null) {
+      if (solutionCache !== null && false) {
         return JSON.parse(solutionCache);
       } else {
         const response = await questionUserService.get(
