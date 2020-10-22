@@ -6,7 +6,7 @@ const { GraphQLServer, PubSub } = require("graphql-yoga");
 const { importSchema } = require("graphql-import");
 const axios = require("axios").default;
 const Redis = require("ioredis");
-const redis = new Redis();
+const redis = new Redis(6379, 'redis-server')
 
 const { Query } = require("./resolvers/Query");
 const { Mutation } = require("./resolvers/Mutation");

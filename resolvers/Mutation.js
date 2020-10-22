@@ -40,7 +40,7 @@ const Mutation = {
         }
       );
       const { data } = response;
-      redis.del("sampleSolutions");
+      redis.del("questions");
       return data;
     } catch (error) {
       return error;
@@ -61,7 +61,7 @@ const Mutation = {
         }
       );
       const { data } = response;
-      redis.del("solutions");
+      redis.del("questions");
       return data;
     } catch (error) {
       return error;
@@ -96,7 +96,7 @@ const Mutation = {
         }
       );
       const { data } = response;
-      redis.del("solution");
+      redis.del("questions");
       return "Solution deleted";
     } catch (error) {
       return error;
